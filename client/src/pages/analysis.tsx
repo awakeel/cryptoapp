@@ -46,9 +46,17 @@ export default function Analysis() {
           />
         </Card>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <TradingStrategy analysis={analysis} />
-          <RiskCalculator analysis={analysis} />
+        <div className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            <TradingStrategy analysis={analysis} />
+            <RiskCalculator analysis={analysis} />
+          </div>
+          <div className="bg-muted p-4 rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              <strong>Disclaimer:</strong> This is AI-generated analysis for educational purposes only. Not financial advice. 
+              Always conduct thorough market research and consider consulting with a licensed financial advisor before making trading decisions.
+            </p>
+          </div>
         </div>
       </div>
     </div>
