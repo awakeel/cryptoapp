@@ -40,12 +40,23 @@ Format the analysis as JSON matching this TypeScript type:
 
 export async function analyzeChart(imageUrl: string) {
   try {
+    console.log("Starting chart analysis...");
+
+    // Validate the image data URL format
+    if (!imageUrl.startsWith('data:image/')) {
+      throw new Error("Invalid image data URL format");
+    }
+
     // Convert data URL to binary
     const base64Image = imageUrl.split(',')[1];
-    const imageData = Buffer.from(base64Image, 'base64');
-    
+    if (!base64Image) {
+      throw new Error("Failed to extract base64 image data");
+    }
+
+    console.log("Image data extracted successfully");
+
     const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
-    
+
     const result = await model.generateContent([
       TRADING_PROMPT,
       {
@@ -55,18 +66,27 @@ export async function analyzeChart(imageUrl: string) {
         }
       }
     ]);
-    
+
     const response = result.response;
     const analysisText = response.text();
-    
+    console.log("Raw AI response:", analysisText);
+
     try {
       // Extract JSON from the response
       const jsonStr = analysisText.match(/\{[\s\S]*\}/)?.[0];
       if (!jsonStr) {
         throw new Error("No JSON found in response");
       }
-      
-      return JSON.parse(jsonStr);
+
+      const analysis = JSON.parse(jsonStr);
+      console.log("Parsed analysis:", analysis);
+
+      // Validate required fields
+      if (!analysis.indicators || !analysis.strategy) {
+        throw new Error("Invalid analysis format: missing required fields");
+      }
+
+      return analysis;
     } catch (parseError) {
       console.error("Failed to parse AI response:", analysisText);
       throw new Error("Failed to parse trading analysis");
