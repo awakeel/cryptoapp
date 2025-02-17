@@ -15,24 +15,7 @@ export default function ChartUpload() {
 
   const mutation = useMutation({
     mutationFn: async (imageUrl: string) => {
-      const res = await apiRequest("POST", "/api/analyses", {
-        imageUrl,
-        indicators: {
-          support: [30000, 28000],
-          resistance: [35000, 38000],
-          patterns: ["bullish engulfing"],
-          rsi: 65,
-          macd: { signal: 0.5, histogram: 0.2 }
-        },
-        strategy: {
-          entryPrice: 32000,
-          stopLoss: 30000,
-          takeProfit: 38000,
-          confidence: 0.85,
-          direction: "long",
-          reasoning: "Strong bullish pattern with support"
-        }
-      });
+      const res = await apiRequest("POST", "/api/analyses", { imageUrl });
       return res.json() as Promise<Analysis>;
     },
     onSuccess: (data) => {
@@ -47,13 +30,19 @@ export default function ChartUpload() {
     }
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
-      // In a real app, upload to storage and get URL
-      const mockImageUrl = URL.createObjectURL(selectedFile);
-      mutation.mutate(mockImageUrl);
+
+      // Convert file to base64 data URL
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          mutation.mutate(event.target.result as string);
+        }
+      };
+      reader.readAsDataURL(selectedFile);
     }
   };
 
@@ -66,6 +55,7 @@ export default function ChartUpload() {
               variant="outline"
               className="h-24 flex flex-col items-center justify-center space-y-2"
               onClick={() => document.getElementById("file-upload")?.click()}
+              disabled={mutation.isPending}
             >
               <Upload className="h-8 w-8" />
               <span>Upload Chart</span>
@@ -85,10 +75,11 @@ export default function ChartUpload() {
             accept="image/*"
             className="hidden"
             onChange={handleFileChange}
+            disabled={mutation.isPending}
           />
           {mutation.isPending && (
             <p className="text-sm text-muted-foreground animate-pulse">
-              Analyzing chart...
+              Analyzing chart with AI...
             </p>
           )}
         </div>

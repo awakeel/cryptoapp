@@ -2,20 +2,30 @@ import type { Express } from "express";
 import { createServer } from "http";
 import { storage } from "./storage";
 import { insertAnalysisSchema } from "@shared/schema";
+import { analyzeChart } from "./ai-service";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express) {
   // Create new analysis
   app.post("/api/analyses", async (req, res) => {
     try {
-      const data = insertAnalysisSchema.parse(req.body);
-      const analysis = await storage.createAnalysis(data);
-      res.json(analysis);
+      // First analyze the chart with AI
+      const analysis = await analyzeChart(req.body.imageUrl);
+
+      // Then save the analysis with validated data
+      const data = insertAnalysisSchema.parse({
+        imageUrl: req.body.imageUrl,
+        ...analysis
+      });
+
+      const savedAnalysis = await storage.createAnalysis(data);
+      res.json(savedAnalysis);
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ message: "Invalid analysis data" });
         return;
       }
+      console.error("Analysis error:", error);
       res.status(500).json({ message: "Failed to create analysis" });
     }
   });
