@@ -55,7 +55,7 @@ export async function analyzeChart(imageUrl: string) {
 
     console.log("Image data extracted successfully");
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const result = await model.generateContent([
       TRADING_PROMPT,
