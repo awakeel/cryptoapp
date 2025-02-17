@@ -3,11 +3,18 @@ import { createServer } from "http";
 import { storage } from "./storage";
 import { insertAnalysisSchema } from "@shared/schema";
 import { analyzeChart } from "./ai-service";
+import { setupAuth } from "./auth";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express) {
+  setupAuth(app);
+
   // Create new analysis
   app.post("/api/analyses", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
     try {
       // First analyze the chart with AI
       const analysis = await analyzeChart(req.body.imageUrl);
@@ -15,6 +22,7 @@ export async function registerRoutes(app: Express) {
       // Then save the analysis with validated data
       const data = insertAnalysisSchema.parse({
         imageUrl: req.body.imageUrl,
+        userId: req.user.id,
         ...analysis
       });
 
@@ -45,6 +53,16 @@ export async function registerRoutes(app: Express) {
     }
 
     res.json(analysis);
+  });
+
+  // Get user's analyses
+  app.get("/api/user/analyses", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    const analyses = await storage.getUserAnalyses(req.user.id);
+    res.json(analyses);
   });
 
   // Get recent analyses
