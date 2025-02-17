@@ -20,6 +20,7 @@ import { SiTradingview, SiGoogle } from "react-icons/si";
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
+  const [isRegistering, setIsRegistering] = React.useState(false);
   const { user, loginMutation, registerMutation } = useAuth();
   const form = useForm({
     resolver: zodResolver(insertUserSchema),
@@ -105,22 +106,44 @@ export default function AuthPage() {
                 )}
               />
               <div className="space-y-2">
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={loginMutation.isPending}
-                >
-                  Sign In
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  onClick={form.handleSubmit(onRegister)}
-                  disabled={registerMutation.isPending}
-                >
-                  Create Account
-                </Button>
+                {!isRegistering ? (
+                  <>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={loginMutation.isPending}
+                    >
+                      Sign In
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setIsRegistering(true)}
+                    >
+                      Create Account
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      type="button"
+                      className="w-full"
+                      onClick={form.handleSubmit(onRegister)}
+                      disabled={registerMutation.isPending}
+                    >
+                      Create Account
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setIsRegistering(false)}
+                    >
+                      Back to Sign In
+                    </Button>
+                  </>
+                )}
               </div>
             </form>
           </Form>
