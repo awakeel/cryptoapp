@@ -1,4 +1,4 @@
-import { analyses, type Analysis, type InsertAnalysis } from "@shared/schema";
+import { analyses, users, type Analysis, type InsertAnalysis, type User, type InsertUser } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
@@ -6,6 +6,13 @@ export interface IStorage {
   createAnalysis(analysis: InsertAnalysis): Promise<Analysis>;
   getAnalysis(id: number): Promise<Analysis | undefined>;
   getRecentAnalyses(): Promise<Analysis[]>;
+  getUserAnalyses(userId: number): Promise<Analysis[]>;
+
+  // User operations
+  createUser(user: InsertUser): Promise<User>;
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByGoogleId(googleId: string): Promise<User | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -22,7 +29,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(analyses)
       .where(eq(analyses.id, id));
-    return analysis || undefined;
+    return analysis;
   }
 
   async getRecentAnalyses(): Promise<Analysis[]> {
@@ -31,6 +38,46 @@ export class DatabaseStorage implements IStorage {
       .from(analyses)
       .orderBy(analyses.createdAt)
       .limit(10);
+  }
+
+  async getUserAnalyses(userId: number): Promise<Analysis[]> {
+    return await db
+      .select()
+      .from(analyses)
+      .where(eq(analyses.userId, userId))
+      .orderBy(analyses.createdAt);
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, username));
+    return user;
+  }
+
+  async getUserByGoogleId(googleId: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.googleId, googleId));
+    return user;
   }
 }
 
