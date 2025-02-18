@@ -9,8 +9,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/use-auth";
 import { User } from "lucide-react";
+
 export default function Header() {
   const { user, logoutMutation } = useAuth();
+
   return (
     <header className="border-b">
       <div className="container mx-auto px-4 py-4">
@@ -22,21 +24,6 @@ export default function Header() {
             </div>
           </Link>
           <nav className="flex items-center space-x-4">
-            <Link href="/">
-              <span className="font-medium text-gray-500 hover:text-gray-900">
-                Home
-              </span>
-            </Link>
-            <Link href="/news">
-              <span className="font-medium text-gray-500 hover:text-gray-900">
-                News
-              </span>
-            </Link>
-            <Link href="/contact">
-              <span className="font-medium text-gray-500 hover:text-gray-900">
-                Contact
-              </span>
-            </Link>
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
