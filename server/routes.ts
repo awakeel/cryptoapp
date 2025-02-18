@@ -5,7 +5,6 @@ import { insertAnalysisSchema } from "@shared/schema";
 import { analyzeChart } from "./ai-service";
 import { setupAuth } from "./auth";
 import { z } from "zod";
-
 export async function registerRoutes(app: Express) {
   setupAuth(app);
 
@@ -23,7 +22,7 @@ export async function registerRoutes(app: Express) {
       const data = insertAnalysisSchema.parse({
         imageUrl: req.body.imageUrl,
         userId: req.user.id,
-        ...analysis
+        ...analysis,
       });
 
       const savedAnalysis = await storage.createAnalysis(data);
@@ -70,7 +69,11 @@ export async function registerRoutes(app: Express) {
     const analyses = await storage.getRecentAnalyses();
     res.json(analyses);
   });
-
+  app.get("/api/news", async (_req, res) => {
+    const googleNews = await storage.getNews();
+    console.log(googleNews);
+    res.json(googleNews);
+  });
   const httpServer = createServer(app);
   return httpServer;
 }
