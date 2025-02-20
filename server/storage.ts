@@ -6,6 +6,9 @@ import {
   type InsertAnalysis,
   type User,
   type InsertUser,
+  InsertNews,
+  insertNewsSchema,
+  NewsItem
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -20,6 +23,9 @@ export interface IStorage {
   getUserAnalyses(userId: number): Promise<Analysis[]>;
   getNews(): Promise<any[]>;
   // User operations
+  getDBNews(): Promise<any[]>;
+  createDBNews(newsItem: InsertNews): Promise<NewsItem>; // Add this line
+
   createUser(user: InsertUser): Promise<User>;
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;

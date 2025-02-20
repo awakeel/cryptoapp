@@ -48,6 +48,10 @@ export const news = pgTable("news", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   type: text("type").notNull(),
+  url: text("url").notNull(),
+  urlToImage: text("url_to_image").notNull(),
+  publishedAt: timestamp("published_at").notNull(),
+  content: text("content").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

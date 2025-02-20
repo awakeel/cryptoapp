@@ -17,7 +17,7 @@ export default function Home() {
       <div className="max-w-6xl mx-auto space-y-8">
         <div className="space-y-2">
           <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            AI Trading Assistant
+            Tera AI Crypto Signals
           </h1>
           <p className="text-muted-foreground">
             Upload a crypto chart and get AI-powered trading strategies
