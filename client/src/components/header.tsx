@@ -18,7 +18,7 @@ export default function Header() {
           <Link href="/">
             <div className="flex items-center space-x-2 cursor-pointer">
               <SiTradingview className="h-6 w-6 text-primary" />
-              <span className="font-bold text-xl">TradingVision AI</span>
+              <span className="font-bold text-xl">Tera Crypto Signals</span>
             </div>
           </Link>
           <nav className="flex items-center space-x-4">
@@ -32,11 +32,7 @@ export default function Header() {
                 News
               </span>
             </Link>
-            <Link href="/contact">
-              <span className="font-medium text-gray-500 hover:text-gray-900">
-                Contact
-              </span>
-            </Link>
+          
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
