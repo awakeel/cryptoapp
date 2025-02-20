@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { Upload, Camera } from "lucide-react";
@@ -10,6 +10,10 @@ import type { Analysis } from "@shared/schema";
 
 export default function ChartUpload() {
   const [file, setFile] = useState<File | null>(null);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -46,6 +50,34 @@ export default function ChartUpload() {
     }
   };
 
+  const handleCaptureScreen = async () => {
+    if (!cameraStream) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        setCameraStream(stream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (error) {
+        console.error("Error accessing camera:", error);
+      }
+    } else {
+      if (videoRef.current && canvasRef.current) {
+        const context = canvasRef.current.getContext("2d");
+        if (context) {
+          context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+          const imageUrl = canvasRef.current.toDataURL("image/png");
+          setCapturedImage(imageUrl);
+          mutation.mutate(imageUrl);
+        }
+      }
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        setCameraStream(null);
+      }
+    }
+  };
+
   return (
     <Card className="bg-muted/50">
       <CardContent className="p-6">
@@ -63,10 +95,11 @@ export default function ChartUpload() {
             <Button
               variant="outline"
               className="h-24 flex flex-col items-center justify-center space-y-2"
-              disabled
+              onClick={handleCaptureScreen}
+              disabled={mutation.isPending}
             >
               <Camera className="h-8 w-8" />
-              <span>Capture Screen</span>
+              <span>{cameraStream ? "Capture Image" : "Open Camera"}</span>
             </Button>
           </div>
           <input
@@ -77,6 +110,12 @@ export default function ChartUpload() {
             onChange={handleFileChange}
             disabled={mutation.isPending}
           />
+          {cameraStream && (
+            <div className="flex flex-col items-center space-y-4">
+              <video ref={videoRef} autoPlay className="w-full max-w-sm" />
+              <canvas ref={canvasRef} className="hidden" width="640" height="480" />
+            </div>
+          )}
           {mutation.isPending && (
             <p className="text-sm text-muted-foreground animate-pulse">
               Analyzing chart with AI...
